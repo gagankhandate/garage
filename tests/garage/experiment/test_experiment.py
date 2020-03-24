@@ -190,3 +190,145 @@ def test_wrap_experiment_raises_on_empty_params():
         @wrap_experiment(prefix=prefix)
         def _test_exp():
             pass
+
+
+def test_wrap_experiment_name_parameters_passed():
+    prefix = 'wrap_exp_test_name_parameters_passed'
+    exp_path = pathlib.Path(os.getcwd(), 'data/local', prefix)
+    _hard_rmtree(exp_path)
+    expected_path = exp_path / 'test_exp_seed=2'
+
+    @wrap_experiment(prefix=prefix, name_parameters='passed')
+    def test_exp(ctxt=None, seed=1):
+        del seed
+        assert expected_path.samefile(ctxt.snapshot_dir)
+
+    assert not exp_path.exists()
+
+    test_exp(seed=2)
+
+    new_folder_contents = list(exp_path.iterdir())
+    assert len(new_folder_contents) == 1
+    assert new_folder_contents[0].samefile(expected_path)
+
+    expected_path = exp_path / 'test_exp_seed=2_1'
+
+    test_exp(seed=2)
+
+    new_folder_contents = list(exp_path.iterdir())
+    assert len(new_folder_contents) == 2
+    assert any([
+        expected_path.samefile(directory) for directory in new_folder_contents
+    ])
+
+    expected_path = exp_path / 'test_exp_seed=3'
+
+    test_exp(seed=3)
+
+    new_folder_contents = list(exp_path.iterdir())
+    assert len(new_folder_contents) == 3
+    assert any([
+        expected_path.samefile(directory) for directory in new_folder_contents
+    ])
+
+
+def test_wrap_experiment_name_parameters_all():
+    prefix = 'wrap_exp_test_name_parameters_all'
+    exp_path = pathlib.Path(os.getcwd(), 'data/local', prefix)
+    _hard_rmtree(exp_path)
+    expected_path = exp_path / 'test_exp_seed=1'
+
+    @wrap_experiment(prefix=prefix, name_parameters='all')
+    def test_exp(ctxt=None, seed=1):
+        del seed
+        assert expected_path.samefile(ctxt.snapshot_dir)
+
+    assert not exp_path.exists()
+
+    test_exp()
+
+    new_folder_contents = list(exp_path.iterdir())
+    assert len(new_folder_contents) == 1
+    assert new_folder_contents[0].samefile(expected_path)
+
+    expected_path = exp_path / 'test_exp_seed=1_1'
+
+    test_exp()
+
+    new_folder_contents = list(exp_path.iterdir())
+    assert len(new_folder_contents) == 2
+    assert any([
+        expected_path.samefile(directory) for directory in new_folder_contents
+    ])
+
+    expected_path = exp_path / 'test_exp_seed=1_2'
+
+    test_exp()
+
+    new_folder_contents = list(exp_path.iterdir())
+    assert len(new_folder_contents) == 3
+    assert any([
+        expected_path.samefile(directory) for directory in new_folder_contents
+    ])
+
+
+def test_wrap_experiment_name_parameters_all_disordered():
+    prefix = 'wrap_exp_test_name_parameters_all_disordered'
+    exp_path = pathlib.Path(os.getcwd(), 'data/local', prefix)
+    _hard_rmtree(exp_path)
+    expected_path = exp_path / 'test_exp_seed=1_env=test-env'
+
+    @wrap_experiment(prefix=prefix, name_parameters='all')
+    def test_exp(ctxt=None, seed=1, env='test-env'):
+        del seed
+        del env
+        assert expected_path.samefile(ctxt.snapshot_dir)
+
+    assert not exp_path.exists()
+
+    test_exp()
+
+    new_folder_contents = list(exp_path.iterdir())
+    assert len(new_folder_contents) == 1
+    assert new_folder_contents[0].samefile(expected_path)
+
+    expected_path = exp_path / 'test_exp_seed=2_env=test-env-v2'
+
+    test_exp(env='test-env-v2', seed=2)
+
+    new_folder_contents = list(exp_path.iterdir())
+    assert len(new_folder_contents) == 2
+    assert any([
+        expected_path.samefile(directory) for directory in new_folder_contents
+    ])
+
+
+def test_wrap_experiment_name_parameters_passed_disordered():
+    prefix = 'wrap_exp_test_name_parameters_passed_disordered'
+    exp_path = pathlib.Path(os.getcwd(), 'data/local', prefix)
+    _hard_rmtree(exp_path)
+    expected_path = exp_path / 'test_exp_seed=2_env=test-env'
+
+    @wrap_experiment(prefix=prefix, name_parameters='passed')
+    def test_exp(ctxt=None, seed=1, env='test-env'):
+        del seed
+        del env
+        assert expected_path.samefile(ctxt.snapshot_dir)
+
+    assert not exp_path.exists()
+
+    test_exp(seed=2, env='test-env')
+
+    new_folder_contents = list(exp_path.iterdir())
+    assert len(new_folder_contents) == 1
+    assert new_folder_contents[0].samefile(expected_path)
+
+    expected_path = exp_path / 'test_exp_seed=2_env=test-env-v2'
+
+    test_exp(env='test-env-v2', seed=2)
+
+    new_folder_contents = list(exp_path.iterdir())
+    assert len(new_folder_contents) == 2
+    assert any([
+        expected_path.samefile(directory) for directory in new_folder_contents
+    ])
